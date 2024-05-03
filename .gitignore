@@ -1,0 +1,6 @@
+clientid.json
+data/
+explorations/
+notebooks/.cache/
+notebooks/.cache
+poetry.lock
