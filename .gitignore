@@ -1,6 +1,3 @@
 clientid.json
-data/
-explorations/
-notebooks/.cache/
-notebooks/.cache
+data
 poetry.lock
