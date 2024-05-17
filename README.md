@@ -63,4 +63,11 @@ oms_fetch = oms.oms_fetch()
 
 Note that these commands assume you have the `clientid.json` file which contains your credentials one directory above the current working directory of the notebook. These commands will read the credentials, load them as environment variables, and when you `import oms`, the library will read the environment variables and allow you to access the OMS API.
 
+### Instructions for obtaining OMS API Credentials
 
+1. Navigate to 'https://application-portal.web.cern.ch/' and click "Add an Application".
+2. Fill in the Application Identifier information. Generate it using a format such as "yourusername-oms-api" and include your name. The rest of the details are not necessary at this step. Proceed to SSO Registration.
+3. Keep the protocol for authentication as OpenID Connect (OIDC). Generate a Redirect URI, for example, https://yourusername-oms-api.cern.ch and a Base URL, for example, https://yourusername-oms-dev.cern.ch. Select the option: "My application will need to get tokens using its own client ID and secret".
+Note: It is not necessary for these URLs to exist. 
+4. You should see your "CLIENT ID" and "CLIENT SECRET". Save them as these are the credentials you need. However, they can't be used until permission is granted.
+5. Email to cmsoms-developers@cern.ch or cmsoms-operations@cern.ch to get the approval. Once it's granted, the OMS API credentials may be utilized. 
