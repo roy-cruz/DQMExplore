@@ -1,3 +1,5 @@
 clientid.json
 data
 poetry.lock
+*.html
+__pycache__

@@ -1,22 +1,37 @@
 [tool.poetry]
 name = "dqmexplore"
-version = "0.1.0"
 description = "A consolidation of DQM data exploration tools."
-authors = ["roy-cruz <roy.cruz@upr.edu>"]
+version = "0.2.0"
 readme = "README.md"
+authors = [
+    "Gabriele Benelli <gabriele.benelli@cern.ch>",
+    "Roy F. Cruz <roy.cruz.candelaria@cern.ch>",
+    "Tetiana Mazurets <tetiana.mazurets@cern.ch>",
+    "Richa Sharma <richa.sharma@cern.ch>"
+]
+repository = "https://github.com/CMSTrackerDPG/DQMExplore/tree/main"
+packages = [{ include = "dqmexplore", from = "src" }]
 
 [tool.poetry.dependencies]
 python = "^3.9"
-cmsdials = "^1.0.1"
+cmsdials = "^1.1.0"
 numpy = "^1.26.4"
 pandas = "^2.2.2"
-matplotlib = "^3.8.4"
-ipykernel = "^6.29.4"
-ipywidgets = "^8.1.2"
-seaborn = "^0.13.2"
 plotly = "^5.22.0"
-nbformat = "^5.10.4"
+ipykernel = { version = "^6.29.4", optional = true }
+ipywidgets = { version = "^8.1.2", optional = true }
+nbformat = { version = "^5.10.4", optional = true }
+oms = { git = "https://github.com/roy-cruz/OMSapi.git", optional = true }
 
+[tool.poetry.extras]
+nb = [
+    "ipykernel",
+    "ipywidgets",
+    "nbformat",
+]
+oms = [
+    "oms"
+]
 
 [build-system]
 requires = ["poetry-core"]
