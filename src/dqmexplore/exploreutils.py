@@ -1,3 +1,5 @@
+import pandas as pd
+
 def check_empty_ls(me_dict, thrshld = 10):
     empty_me_dict = {}
     for me in list(me_dict.keys()):
@@ -6,4 +8,4 @@ def check_empty_ls(me_dict, thrshld = 10):
         for i, entries in enumerate(me_dict[me]["entries"]):
             if entries < thrshld:
                 empty_me_dict[me]["empty_lss"].append(i + 1)
-    return empty_me_dict
+    return pd.DataFrame(empty_me_dict).T
