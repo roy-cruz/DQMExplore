@@ -1,6 +1,7 @@
 import pandas as pd
 
-def check_empty_ls(me_dict, thrshld = 10):
+
+def check_empty_ls(me_dict, thrshld=10):
     empty_me_dict = {}
     for me in list(me_dict.keys()):
         empty_me_dict[me] = {}
