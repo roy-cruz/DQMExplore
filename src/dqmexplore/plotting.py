@@ -9,7 +9,7 @@ from dqmexplore.dataproc import generate_me_dict, normalize, integrate, trig_nor
 
 # Plotting function
 def plot1DMEs(
-        me_df, 
+        me_data, 
         fig_title = "",
         ax_labels = None,
         trigger_rates = None,
@@ -26,7 +26,12 @@ def plot1DMEs(
         if norm == False: raise ValueError("To display reference, you must normalize the MEs.")
     
     # Extraction
-    me_dict = generate_me_dict(me_df)
+    if isinstance(me_data, pd.DataFrame):
+        me_dict = generate_me_dict(me_data)
+    elif isinstance(me_data, dict):
+        me_dict = me_data
+    else:
+        raise ValueError("Wrong type for me_data.")
     
     # Processing
     if trigger_rates is not None:

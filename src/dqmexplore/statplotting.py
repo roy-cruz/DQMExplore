@@ -125,13 +125,16 @@ def plotheatmaps1D(
     fig_title = "",
     ax_labels = None,
     trigger_rates = None,
-    show = False
+    norm = False,
+    show = False,
     ):
     
     me_dict = generate_me_dict(me_df)
     
     if trigger_rates is not None:
         trig_normalize(me_dict, trigger_rates)
+    if norm:
+        me_dict = normalize(me_dict)
         
     fig = create_heatmap(me_dict, fig_title=fig_title, ax_labels=ax_labels)
     

@@ -60,7 +60,7 @@ def plot_rate(trigrate_df, norm=False, show=False):
         yaxis_title = "Trigger rate",
     )
 
-    fig.update_yaxes(range=[0, rate.max()])
+    fig.update_yaxes(range=[0, rate.max() + rate.max() * 0.1])
     fig.update_xaxes(range=[1, trigrate_df["last_lumisection_number"].max()])
 
     if show:
