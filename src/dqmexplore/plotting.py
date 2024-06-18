@@ -14,6 +14,10 @@ def plot1DMEs(
     ref_df=None,
     norm=False,
     show=False,
+    hspace=0.05,
+    vspace=0.15,
+    width=1600,
+    height=1600,
 ):
     """
     Create interactive per-LS plotly figure from monitoring element(s) dataframe. Just for one run and for 1D MEs.
@@ -48,7 +52,14 @@ def plot1DMEs(
 
     # Plotting
     fig = create_plot(
-        me_dict, fig_title=fig_title, ax_labels=ax_labels, ref_dict=ref_dict
+        me_dict,
+        fig_title=fig_title,
+        hspace=hspace,
+        vspace=vspace,
+        width=width,
+        height=height,
+        ax_labels=ax_labels,
+        ref_dict=ref_dict,
     )
 
     if show:
@@ -57,7 +68,17 @@ def plot1DMEs(
         return fig
 
 
-def plot2DMEs(me_df, fig_title="", ax_labels=None, trigger_rates=None, show=False):
+def plot2DMEs(
+    me_df,
+    fig_title="",
+    hspace=0.05,
+    vspace=0.15,
+    width=1600,
+    height=1600,
+    ax_labels=None,
+    trigger_rates=None,
+    show=False,
+):
 
     # Extraction
     me_dict = generate_me_dict(me_df)
@@ -67,7 +88,15 @@ def plot2DMEs(me_df, fig_title="", ax_labels=None, trigger_rates=None, show=Fals
         me_dict = trig_normalize(me_dict, trigger_rates)
 
     # Plotting
-    fig = create_plot(me_dict, fig_title=fig_title, ax_labels=ax_labels)
+    fig = create_plot(
+        me_dict,
+        fig_title=fig_title,
+        ax_labels=ax_labels,
+        hspace=hspace,
+        vspace=vspace,
+        width=width,
+        height=height,
+    )
 
     if show:
         fig.show()
@@ -75,7 +104,9 @@ def plot2DMEs(me_df, fig_title="", ax_labels=None, trigger_rates=None, show=Fals
         return fig
 
 
-def create_plot(me_dict, fig_title, ref_dict=None, ax_labels=None):
+def create_plot(
+    me_dict, fig_title, hspace, vspace, width, height, ref_dict=None, ax_labels=None
+):
     """
     Creates plotly interactive per-LS plot
     """
@@ -98,8 +129,8 @@ def create_plot(me_dict, fig_title, ref_dict=None, ax_labels=None):
         rows=num_rows,
         cols=num_cols,
         subplot_titles=mes,
-        vertical_spacing=0.15,
-        horizontal_spacing=0.05,
+        vertical_spacing=vspace,
+        horizontal_spacing=hspace,
     )
     fig.update_annotations(font_size=10)
 
@@ -153,8 +184,8 @@ def create_plot(me_dict, fig_title, ref_dict=None, ax_labels=None):
         title_font={"size": 24},
         bargap=0,
         showlegend=False,
-        width=1600,
-        height=1600,
+        width=width,
+        height=height,
     )
 
     for i, me in enumerate(mes):
