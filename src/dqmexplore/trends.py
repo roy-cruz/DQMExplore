@@ -1,108 +1,116 @@
 import plotly.graph_objects as go
-import plotly.io as pio
 import numpy as np
-from statistics import stdev
+import pandas as pd
+from dqmexplore.dataproc import generate_me_dict, trig_normalize
+from dqmexplore.exploreutils import check_empty_lss
 
 
-def calc_trends(histbins, ls, max_value, trigger_rate, norm=False):
-    """
-    Calculates ~peak value, std error on mean, and list of empty LS.
-    Also normalises by trigger rate if norm=True
+def compute_trends(data, trigger_rates=None):
+    def compute_avg(histbins, x_bins):
+        weighted_sums = np.sum(histbins * x_bins, axis=1)
+        sum_of_weights = np.sum(histbins, axis=1)
+        x_avg = np.nan_to_num(weighted_sums / sum_of_weights, nan=0)
+        return x_avg
 
-    Parameters:
-    histbins: data in the form of numpy array
-    ls: list of lumisections
-    max_value: maximum value of the quantity being measured along x-axis
-    trigger_rate: np array obtained from oms
-    norm: Boolean (default False)
+    def compute_std(histbins, x_bins, x_avg):
+        sqrd_devs = np.sum(histbins * (x_bins - x_avg[:, np.newaxis]) ** 2, axis=1)
+        sum_of_weights = np.sum(histbins, axis=1)
+        variance = np.nan_to_num(sqrd_devs / sum_of_weights, nan=0)
+        std_dev = np.sqrt(variance)
+        return std_dev
 
-    Returns:
-    list_means: position of peak. It's not precise because the distributions are not Gaussian
-    list_std: standard error on mean
-    list_good_ls: non-zero LS
-    empty_ls:
-    """
-    list_means = []  # peak
-    list_std = []
-    list_good_ls = []
-    empty_ls = []
-    good_trigger = []
-    for i in range(len(histbins)):
-        ls_num = ls[i]
-        # Calculate Mean and Std Error on Mean
+    if isinstance(data, pd.DataFrame):
+        data = generate_me_dict(data)
 
-        if any(histbins[i]):
-            n_bins = len(histbins[i])
-            actual_values = np.linspace(0, max_value, n_bins, endpoint=True)
+    if trigger_rates is not None:
+        data = trig_normalize(data, trigger_rates)
 
-            peak_value = np.average(
-                actual_values, weights=histbins[i]
-            )  # needs modification to get actual peak?? Fit a Landau/Langaus and get the MPV
-            std_dev = stdev(histbins[i])
-            sem = std_dev / np.sqrt(
-                n_bins
-            )  # standard error on mean = (standard deviation)/sqrt(n)
+    empty_lss = check_empty_lss(data, thrshld=0)
 
-            list_good_ls.append(ls_num)
-            list_means.append(peak_value)
-            list_std.append(sem)
-            good_trigger.append(trigger_rate[i])
-        else:
-            peak_value = 0
-            std_dev = 0
-            empty_ls.append(ls_num)
+    trends = {}
+
+    for me in data.keys():
+        trends[me] = {}
+        histbins = data[me]["data"]
+        x_bins = data[me]["x_bins"]
+        trends[me]["mean"] = compute_avg(histbins, x_bins)  # e.g. mean charge
+        trends[me]["stdev"] = compute_std(
+            histbins, x_bins, trends[me]["mean"]
+        )  # e.g. std of charge
+        trends[me]["max"] = x_bins[np.argmax(histbins, axis=1)]  # e.g. max charge
+        trends[me]["std_err_on_mean"] = trends[me]["stdev"] / np.sqrt(
+            data[me]["data"].shape[1]
+        )
+        trends[me]["empty_lss"] = np.array(empty_lss[me]["empty_lss"])
+
+    return trends
+
+
+def plot_trends(
+    trends,
+    me,
+    to_plot=["mean", "stdev", "max"],
+    fig_titles=[],
+    ylabels=[],
+    norm=False,
+    log=False,
+    show=False,
+):
+    to_plot = np.array(to_plot)
 
     if norm:
+        for trend in to_plot:
+            trends[me][trend] = trends[me][trend] / np.sum(trends[me][trend])
 
-        list_means = np.divide(list_means, good_trigger)
-        list_std = np.divide(list_std, good_trigger)
+    fig = go.Figure()
 
-    return list_means, list_std, list_good_ls, empty_ls
+    buttons = []
+    for i, stat in enumerate(trends[me].keys()):
+        if stat in to_plot:
+            fig_title = stat if len(fig_titles) == 0 else fig_titles[i]
+            ylabel = "YAXIS" if len(ylabels) == 0 else ylabels[i]
+            if i == 0:
+                visible = True
+                fig.update_layout(title=fig_title)
+                fig.update_layout(yaxis={"title": ylabel})
+            else:
+                visible = False
+            trace = go.Scatter()
+            trace.y = trends[me][stat]
+            trace.x = np.arange(len(trends[me][stat])) + 1
+            trace.mode = "lines+markers"
+            trace.visible = visible
+            fig.add_trace(trace)
 
+            buttons.append(
+                dict(
+                    args=[
+                        {"visible": to_plot == stat},
+                        {
+                            "title": fig_title,
+                            "yaxis": {
+                                "title": ylabel,
+                                "type": "log" if log else "linear",
+                            },
+                        },
+                    ],
+                    label=stat,
+                    method="update",
+                ),
+            )
 
-def plot_trends(list_raw, list_norm, list_good_ls, title, me_name, runnb, write=False):
-
-    plot = go.Figure()
-    custom_ticks = [x for x in list_good_ls]
-    plot.add_trace(go.Scatter(x=list(range(len(list_raw))), y=list_raw, visible=True))
-
-    plot.add_trace(
-        go.Scatter(x=list(range(len(list_norm))), y=list_norm, visible=False)
-    )
-
-    # Add dropdown
-    plot.update_layout(
-        title=title + ", " + me_name + ", Run: " + str(runnb),
-        xaxis_title="LS",
-        xaxis=dict(tickvals=list(range(len(list_good_ls))), ticktext=custom_ticks),
+    fig.update_layout(
         updatemenus=[
             dict(
-                buttons=list(
-                    [
-                        dict(
-                            args=[{"visible": [True, False]}],
-                            label="Raw",
-                            method="restyle",
-                        ),
-                        dict(
-                            args=[{"visible": [False, True]}],
-                            label="Normalised",
-                            method="restyle",
-                        ),
-                    ]
-                ),
+                buttons=(buttons),
                 direction="down",
             ),
         ],
+        xaxis_title="LS",
+        yaxis_type="log" if log else "linear",
     )
 
-    plot.show()
-
-    if write:
-        html_content = pio.to_html(plot, include_plotlyjs="cdn")
-
-        # Write the HTML content to a file
-        name_hist = str(runnb) + "_" + me_name.split("/")[-1] + "_" + title + ".html"
-        with open(name_hist, "w") as f:
-            f.write(html_content)
-        # pio.write_html(fig, name_hist)
+    if show:
+        fig.show()
+    else:
+        return fig
