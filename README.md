@@ -1,53 +1,37 @@
 # DQMExplore
 
-This repository hosts `dqmexplore`, a Python package which provides tools that facilitate the exploration of CMS DQM data for shifters, shift leaders & experts. These tools enable the evaluation of runs at a per-lumisection level. It utilized the [DIALS API](https://github.com/cms-DQM/dials-py) to access monitoring element histograms, as well as the [OMS API](https://gitlab.cern.ch/cmsoms/oms-api-client) to obtain information regarding the data taking conditions and trigger rate.
+This repository hosts `dqmexplore`, a Python software package that provides tools to facilitate the exploration of CMS DQM data for shifters, shift leaders, and experts. These tools enable the evaluation of runs at a per-lumisection level by allowing the user to plot 1D and 2D monitoring elements as well as trends in these using data obtained from the [DIALS Python API](https://github.com/cms-DQM/dials-py).
 
 ## Setup
 
-The tools offered in this repo are meant to be primarily used in [SWAN](https://swan.web.cern.ch/swan/), but this project includes a `pyproject.toml` and `requirements.txt` which defines all of the dependencies, so you can set things up in your preferred way. However, if you are going to use the OMS API, you will need to be working inside the lxplus. Using this API also requires authentication. Please visit the official [OMS API repo](https://gitlab.cern.ch/cmsoms/oms-api-client/-/tree/master) for more information on the available authentication methods.
+The tools offered in this repo are meant to be primarily used in [SWAN](https://swan.web.cern.ch/swan/). The tools provided by `dqmexplore` can be used by either installing it as a Python package, for which a `pyproject.toml` and `requirements.txt` are included, or by adding `src/` to the system path and importing it.
 
-To setup DQMExplore, firstly:
-1. Navigate to SWAN and click the "Download Project from git" button in the top right.
-2. Insert the link to this repository, namely `https://github.com/CMSTrackerDPG/DQMExplore.git`, and click "Download". SWAN will automatically create a new project with all of the files from this repository.
-3. Launch the notebook you wish to use. Template notebooks are found in the `DQMExplore/notebooks` directory. SWAN should already have all the depedencies you need except for the `omsapi` & `dqmplore` . Assuming you are in the `notebooks` subdirectory, to install them, simply run the following in your notebook.
-    ```
-    !pip3 install omsapi
-    !pip3 install .. --no-dependencies
-    ```
-    If you are setting your virtual environment, assuming you are located in the project's root directory, you can install all the required libraries by running the following inside your environment.
-    ```bash
-    pip3 install poetry 
-    poetry install -E oms -E nb
-    ```
+### Accessing and Plotting Data with `dqmexplore` & `cmsdials`
 
-### Importing `cmsdials`
-
-To import `cmsdials`, run the following in your notebook
+In `src/utils/setupdials.py`, the small function `setup_dials_object_deviceauth()` ([original source](https://github.com/cms-DQM/dials-py/blob/develop/tests/integration/utils.py)) is included. This function will automate the setup of DIALS so you can start accesing data easily. Here is an example usage where we use it to access some PixelPhase1 1D monitoring elements for run 380238:
 
 ```python
-import cmsdials
-from cmsdials.auth.client import AuthClient
-from cmsdials.auth.bearer import Credentials
-from cmsdials import Dials
-from cmsdials.filters import LumisectionHistogram1DFilters, LumisectionHistogram2DFilters
+import sys
+sys.path.append("../src/")
 
-auth = AuthClient()
-token = auth.device_auth_flow()
-creds = Credentials.from_authclient_token(token)
+# Setup DIALS
+from utils.setupdials import setup_dials_object_deviceauth
+dials = setup_dials_object_deviceauth()
 
-creds = Credentials.from_creds_file()
-dials = Dials(creds)
+# Query
+runnb = 380238
+me__regex =  "PixelPhase1/Tracks/PXBarrel/charge_PXLayer_." 
+
+data1D = dials.h1d.list_all(
+    LumisectionHistogram1DFilters(
+        run_number = runnb,
+        dataset__regex = "ZeroBias",
+        me__regex = me__regex
+    ),
+    # max_pages=200
+).to_pandas() # Returns a Dataframe
 ```
 
-Click on the link it provides and log in using your CERN account. Once you do that, come back to your notebook. For more information, please visit the [DIALS API repository](https://github.com/cms-DQM/dials-py).
+When run, this will prompt the user to follow a link which, when clicked will open a webpage which will prompt you to log in using your CERN account. One logged in, click "Yes" when it asks if you want to grant access privileges to cms-dials-prod-confidential-app. Once that is done, come back to your notebook. For more information, please visit the [DIALS Python API repository](https://github.com/cms-DQM/dials-py).
 
-### Instructions for obtaining OMS API Credentials
-
-If you wish to use token authentication for OMS API, you can follow the following steps to obtain the credentials. More information can be found in the [OMS API repository](https://gitlab.cern.ch/cmsoms/oms-api-client/-/tree/master).
-
-1. Navigate to to [this link]('https://application-portal.web.cern.ch/') and click "Add an Application".
-2. Fill in the Application Identifier information. Generate it using a format such as `<yourusername>-oms-api` and include your name. The rest of the details are not necessary at this step. Proceed to SSO Registration.
-3. Keep the protocol for authentication as OpenID Connect (OIDC). Generate a Redirect URI (e.g. `https://<yourusername>-oms-api.cern.ch`) and a Base URL (e.g. `https://<yourusername>-oms-dev.cern.ch`). Select the option: "My application will need to get tokens using its own client ID and secret".
-Note: It is not necessary for these URLs to exist.
-4. You should see your "CLIENT ID" and "CLIENT SECRET". Save them as these are the credentials you need. However, they can't be used until permission is granted.
-5. Send an email to cmsoms-developers@cern.ch or cmsoms-operations@cern.ch to get the approval. Once it's granted, the OMS API credentials may be utilized.
+For examples on how to use the tools provided by `dqmexplore` to plot the data obtained from `cmsdials`, please refer to the notebooks found in `notebooks/`.
