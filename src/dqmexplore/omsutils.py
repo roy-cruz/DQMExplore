@@ -1,6 +1,7 @@
 import pandas as pd
 import plotly.graph_objects as go
 import numpy as np
+from cmsdials.filters import OMSFilter, OMSPage
 
 
 def makeDF(json):
@@ -15,23 +16,24 @@ def makeDF(json):
     return pd.DataFrame(datasetlist, columns=keys)
 
 
-def get_rate(oms_fetch, runnb, dataset_name, extrafilters=[], dataframe=True):
+def get_rate(dials, runnb, dataset_name, extrafilters=[], rtrn_np=True):
     filters = [
-        dict(attribute_name="dataset_name", value=dataset_name, operator="EQ"),
-        dict(attribute_name="run_number", value=runnb, operator="EQ"),
+        OMSFilter(attribute_name="run_number", value=runnb, operator="EQ"),
+        OMSFilter(attribute_name="dataset_name", value=dataset_name, operator="EQ"),
     ]
-    filters.extend(extrafilters)
 
-    query = oms_fetch.query("datasetrates")
-    query.filters(filters)
-    query.per_page = 2000
+    data = dials.oms.query(
+        endpoint="datasetrates", 
+        filters=filters
+    )
+    
+    data_df = makeDF(data)
+    data_df.sort_values(by="last_lumisection_number", inplace=True)
 
-    omstrig_df = makeDF(query.data().json())
-
-    if dataframe:
-        return omstrig_df
+    if rtrn_np:
+        return data_df["rate"].to_numpy()
     else:
-        return omstrig_df["rate"].to_numpy()
+        return data_df
 
 
 def plot_rate(trigrate_df, norm=False, show=False):
