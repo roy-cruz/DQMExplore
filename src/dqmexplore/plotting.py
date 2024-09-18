@@ -111,7 +111,7 @@ def create_plot(
     Creates plotly interactive per-LS plot
     """
 
-    all_1D = np.array([me_info["me_id"] <= 95 for me_info in me_dict.values()]).all()
+    all_1D = np.array([(me_info["dim"] == 1) for me_info in me_dict.values()]).all()
     if (not all_1D) and (ref_dict is not None):
         raise ValueError(
             "Reference data given for invalid ME type(s). Plot 2D reference MEs separately."
@@ -140,11 +140,11 @@ def create_plot(
         row = (i // num_cols) + 1
         col = (i % num_cols) + 1
         for ls in range(num_lss):
-            if me_dict[me]["me_id"] <= 95:
+            if me_dict[me]["dim"] == 1:
                 trace = go.Bar()
                 trace.x = me_dict[me]["x_bins"]
                 trace.y = me_dict[me]["data"][ls]
-            elif me_dict[me]["me_id"] >= 96:
+            elif me_dict[me]["dim"] == 2:
                 trace = go.Heatmap()
                 trace.x = me_dict[me]["x_bins"]
                 trace.y = me_dict[me]["y_bins"]
@@ -194,10 +194,10 @@ def create_plot(
         col = (i % num_cols) + 1
 
         max_data = me_dict[me]["data"].max()
-        if me_dict[me]["me_id"] <= 95:
+        if me_dict[me]["dim"] == 1:
             fig.update_yaxes(range=[0, max_data], row=row, col=col)
 
-        if me_dict[me]["me_id"] >= 96:
+        if me_dict[me]["dim"] == 2:
             fig.update_traces(showscale=False)
 
         if ax_labels is not None:

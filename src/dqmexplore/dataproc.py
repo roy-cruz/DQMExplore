@@ -1,4 +1,5 @@
 import numpy as np
+from dqmexplore.me_ids import meIDs1D, meIDs2D
 
 
 def generate_me_dict(me_df):
@@ -15,6 +16,12 @@ def generate_me_dict(me_df):
 
         sorted_dfsubset = me_df[me_df["me"] == me].sort_values(by="ls_number")
         me_id = sorted_dfsubset["me_id"].unique()[0]
+        if me_id in meIDs1D:
+            dim = 1
+        elif me_id in meIDs2D:
+            dim = 2
+        else:
+            raise ValueError("Unrecognized monitoring element id number")
         data_arr = np.array(sorted_dfsubset["data"].to_list())
         entries = np.array(sorted_dfsubset["entries"].to_list())
 
@@ -24,7 +31,7 @@ def generate_me_dict(me_df):
             int(sorted_dfsubset["x_bin"].iloc[0]),
         )
 
-        if me_id >= 96:
+        if dim == 2:
             me_dict[me]["y_bins"] = np.linspace(
                 sorted_dfsubset["y_min"].iloc[0],
                 sorted_dfsubset["y_max"].iloc[0],
@@ -32,6 +39,7 @@ def generate_me_dict(me_df):
             )
 
         me_dict[me]["me_id"] = me_id
+        me_dict[me]["dim"] = dim
         me_dict[me]["data"] = data_arr
         me_dict[me]["entries"] = entries
 
@@ -67,9 +75,9 @@ def trig_normalize(data_dict, trigger_rates: np.ndarray) -> np.ndarray:
     """
     mes = list(data_dict.keys())
     for me in mes:
-        if data_dict[me]["me_id"] <= 95:
+        if data_dict[me]["dim"] == 1:
             data_dict[me]["data"] = data_dict[me]["data"] / trigger_rates[:, np.newaxis]
-        elif data_dict[me]["me_id"] >= 96:
+        elif data_dict[me]["dim"] == 2:
             n = data_dict[me]["data"].shape[1]
             m = data_dict[me]["data"].shape[2]
             data_dict[me]["data"] = data_dict[me]["data"] / np.repeat(
