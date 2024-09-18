@@ -24,7 +24,8 @@ def get_rate(dials, runnb, dataset_name, extrafilters=[], rtrn_np=True):
 
     data = dials.oms.query(
         endpoint="datasetrates", 
-        filters=filters
+        filters=filters,
+        pages=[OMSPage(attribute_name="limit", value=5000)],
     )
     
     data_df = makeDF(data)
