@@ -1,5 +1,6 @@
 import numpy as np
 from dqmexplore.me_ids import meIDs1D, meIDs2D
+import warnings
 
 
 class MEData:
@@ -8,6 +9,8 @@ class MEData:
         self._generate_me_dict(me_df)
 
     def _generate_me_dict(self, me_df):
+        if len(me_df) == 0:
+            warnings.warn("Input DataFrame is empty.")
         mes = list(me_df["me"].unique())
 
         for me in mes:
