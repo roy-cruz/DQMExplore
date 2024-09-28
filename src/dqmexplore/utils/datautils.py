@@ -1,10 +1,11 @@
+import pandas as pd
 import numpy as np
 from dqmexplore.me_ids import meIDs1D, meIDs2D
 
 
 def generate_me_dict(me_df):
     """
-    Reformats monitoring element dataframe and spits out a reduced version of it in dictionary form, putting the data into a np array which allows for vectorized operations.
+    Reformats monitoring element dataframe and outputs out a reduced version of it in dictionary form, putting the data into a np array which allows for vectorized operations.
     """
     mes = list(me_df["me"].unique())
 
@@ -84,3 +85,27 @@ def trig_normalize(data_dict, trigger_rates: np.ndarray) -> np.ndarray:
                 trigger_rates[:, np.newaxis], n * m, axis=1
             ).reshape(-1, n, m)
     return data_dict
+
+
+def makeDF(json):
+    datadict = json["data"][0]["attributes"]
+    keys = datadict.keys()
+
+    datasetlist = []
+
+    for i in range(len(json["data"])):
+        values = json["data"][i]["attributes"].values()
+        datasetlist.append(values)
+    return pd.DataFrame(datasetlist, columns=keys)
+
+
+def check_empty_lss(me_df, thrshld=0):
+    me_dict = generate_me_dict(me_df)
+    empty_me_dict = {}
+    for me in list(me_dict.keys()):
+        empty_me_dict[me] = {}
+        empty_me_dict[me]["empty_lss"] = []
+        for i, entries in enumerate(me_dict[me]["entries"]):
+            if entries <= thrshld:
+                empty_me_dict[me]["empty_lss"].append(i + 1)
+    return pd.DataFrame(empty_me_dict).T
