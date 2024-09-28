@@ -75,16 +75,14 @@ def plot2DMEs(
     trigger_rates=None,
     show=False,
 ):
-
-    # Extraction
-    # if (not isinstance(me_data, MEData)) or (not isinstance(ref_data, MEData) and ref_data is not None):
     if not isinstance(me_data, MEData):
         raise TypeError("Data must be of type MEData")
 
-    # Processing
     if trigger_rates is not None:
         to_plot = "trignorm"
         me_data.normData(trigger_rates)
+    else:
+        to_plot = "data"
 
     # Plotting
     fig = create_plot(

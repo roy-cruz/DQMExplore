@@ -109,3 +109,11 @@ def check_empty_lss(me_df, thrshld=0):
             if entries <= thrshld:
                 empty_me_dict[me]["empty_lss"].append(i + 1)
     return pd.DataFrame(empty_me_dict).T
+
+
+def print_availMEs(dials, dims=None, contains=""):
+    mes_df = pd.DataFrame([me_qry_rslt.__dict__ for me_qry_rslt in dials.mes.list()])
+    if dims in [1, 2]:
+        mes_df = mes_df[mes_df["dim"] == dims]
+    for me in mes_df[mes_df["me"].str.contains(contains)]["me"]:
+        print(me)
