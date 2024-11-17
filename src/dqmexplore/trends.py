@@ -1,7 +1,7 @@
 import plotly.graph_objects as go
 import numpy as np
 import pandas as pd
-from dqmexplore.utils.datautils import generate_me_dict, trig_normalize, check_empty_lss
+from dqmexplore.utils.datautils import makeDF
 
 
 def compute_trends(medata, trigger_rates=None):
