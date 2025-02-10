@@ -1,6 +1,6 @@
 # DQMExplore
 
-This repository hosts `dqmexplore`, a Python software package that provides tools to facilitate the exploration of CMS DQM data for shifters, shift leaders, and experts. These tools enable the evaluation of runs at a per-lumisection level by allowing the user to plot 1D and 2D monitoring elements as well as trends in these using data obtained from the [DIALS Python API](https://github.com/cms-DQM/dials-py).
+This repository hosts `dqmexplore`, a Python software package that provides tools to facilitate the exploration of CMS DQM data for shifters, shift leaders, and experts. These tools enable the evaluation of runs at a per-lumisection level by allowing the user to plot 1D and 2D monitoring elements as well as trends in these using data obtained from the [DIALS Python API](https://github.com/cms-DQM/dials-py). In addition, it provides notebooks to facilitate the use data from sources such as OMS, Run Registry and CertHelper is a programatic way.
 
 ## Setup
 
@@ -8,7 +8,7 @@ The tools offered in this repo are meant to be primarily used in [SWAN](https://
 
 ### Accessing and Plotting Data with `dqmexplore` & `cmsdials`
 
-In `src/utils/setupdials.py`, the small function `setup_dials_object_deviceauth()` ([original source](https://github.com/cms-DQM/dials-py/blob/develop/tests/integration/utils.py)) is included. This function will automate the setup of DIALS so you can start accesing data easily. Here is an example usage where we use it to access some PixelPhase1 1D monitoring elements for run 380238:
+In `src/utils/setupdials.py`, the small function `setup_dials_object_deviceauth()` ([original source](https://github.com/cms-DQM/dials-py/blob/develop/tests/integration/utils.py)) is included. This function will automate the setup of DIALS so you can start accesing ME data easily. Here is an example usage where we use it to access some PixelPhase1 1D monitoring elements for run 380238:
 
 ```python
 import sys
