@@ -1,44 +1,28 @@
-[tool.poetry]
+[project]
 name = "dqmexplore"
-description = "A consolidation of DQM data exploration tools."
 version = "0.2.0"
-readme = "README.md"
+description = "A consolidation of DQM data exploration tools."
 authors = [
-    "Gabriele Benelli <gabriele.benelli@cern.ch>",
-    "Roy F. Cruz <roy.cruz.candelaria@cern.ch>",
-    "Tetiana Mazurets <tetiana.mazurets@cern.ch>",
-    "Richa Sharma <richa.sharma@cern.ch>"
+    {name = "Gabriele Benelli",email = "gabriele.benelli@cern.ch"},
+    {name = "Roy F. Cruz",email = "roy.cruz.candelaria@cern.ch"},
+    {name = "Tetiana Mazurets",email = "tetiana.mazurets@cern.ch"},
+    {name = "Richa Sharma",email = "richa.sharma@cern.ch"}
 ]
+readme = "README.md"
 repository = "https://github.com/CMSTrackerDPG/DQMExplore/tree/main"
-packages = [{ include = "dqmexplore", from = "src" }]
+packages = [
+    { include = "dqmexplore" }
+]
+packages-dir = {"" = "src"}
+requires-python = ">=3.10,<4.0"
 
 [tool.poetry.dependencies]
-python = "^3.9"
-cmsdials = "^1.4.0"
-runregistry = "^3.0.0"
-numpy = "^1.26.4"
-pandas = "^2.2.2"
-plotly = "^5.22.0"
-ipykernel = { version = "^6.29.4", optional = true }
-ipywidgets = { version = "^8.1.2", optional = true }
-nbformat = { version = "^5.10.4", optional = true }
-pre-commit = { version = "^3.7.1", optional = true }
-poetry-plugin-export = { version = "^1.8.0", optional = true }
-
-[tool.poetry.extras]
-nb = [
-    "ipykernel",
-    "ipywidgets",
-    "nbformat",
-]
-rr = [
-    "runregistry"
-]
-dev = [
-    "pre-commit",
-    "poetry-plugin-export"
-]
+cmsdials = {git = "ssh://git@gitlab.cern.ch:7999/cms-dqmdc/libraries/dials-py.git", extras = ["pandas", "tqdm"]}
+notebook = "^7.3.2"
+runregistry = "^3.1.1"
+plotly = "^6.0.0"
+dask = "^2025.2.0"
 
 [build-system]
-requires = ["poetry-core"]
+requires = ["poetry-core>=2.0.0,<3.0.0"]
 build-backend = "poetry.core.masonry.api"
